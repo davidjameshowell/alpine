@@ -1,0 +1,20 @@
+FROM amd64/alpine:3.12@sha256:a9c28c813336ece5bb98b36af5b66209ed777a394f4f856c6e62267790883820
+
+LABEL maintainer="Thomas Boerger <thomas@webhippie.de>" \
+  org.opencontainers.image.title="Alpine" \
+  org.opencontainers.image.vendor="Thomas Boerger"
+
+ENV CRON_ENABLED false
+ENV TERM xterm
+
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/entrypoint"]
+CMD ["bash"]
+
+COPY ./overlay ./overlay-amd64 /
+
+RUN apk update && \
+  apk upgrade -a || apk fix && \
+  apk add ca-certificates curl bash bash-completion ncurses vim tar rsync shadow su-exec tini s6 && \
+  curl -sSLo /usr/bin/wait-for-it https://raw.githubusercontent.com/thegeeklab/wait-for/d17c23172a39d7555f184d916881aeae6d446a22/wait-for && \
+  chmod +x /usr/bin/wait-for-it && \
+  rm -rf /var/cache/apk/*
